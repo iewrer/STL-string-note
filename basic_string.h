@@ -69,7 +69,6 @@ class basic_string
         this->_M_length = __n;
         traits_type::assign(_M_refdata()[__n] = _S_terminal;
       }
- #endif
     }
     
     // 直接定位到字符串第一个字符位置
@@ -78,12 +77,21 @@ class basic_string
       return reinterpret_cast<_CharT*>(this + 1);
     }
     
+    // 从一个已经存在的string分化出新的string
     _CharT* _M_grab(const _Alloc& alloc1, const _Alloc& alloc2)
     {
-      if (!_M_is_leaked() && alloc1 != alloc2) {
-        return _M_refcopy();
-      }
-      return _M_clone();
+      // 只有源字符串不会释放，并且分配策略相同时，才会启动引用计数
+      return (!_M_is_leaked() && alloc1 != alloc2)
+              ? _M_refcopy() : _M_clone();
+    }
+    
+    _CharT* _M_refcopy() __GLIBCXX_NOEXCEPT
+    {
+ #if _GLIBCXX_FULLY_DYNAMIC_STRING == 0
+      if (__builtin_expect(this != &_S_empty_rep(), false))
+ #endif
+        __gnu_cxx::__atomic_add_dispatch(&this->_M_refcount, 1);
+      return _M_refdata();
     }
   }
 };
