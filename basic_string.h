@@ -25,10 +25,20 @@ class basic_string
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
   
-  struct _Rep_Base {
+  struct _Rep_Base
+  {
     size_type    _M_length;
     size_type    _M_capacity;
     _Atomic_word _M_refcount;    // 用于COW的原子引用计数
+  };
+  
+  struct _Rep : _Rep_Base
+  {
+    typedef typename _Alloc::template rebind<char>::other _Raw_bytes_alloc;
+    
+    // 注意不是string的最大内存，而是最长字符个数。单个最长字符串消耗的所有内存为
+    // 地址空间的1/4
+    static const size_type _S_max_size = ((npos - sizeof(_Rep_Base)) / sizeof(_CharT) - 1) / 4;
   }
 };
 
