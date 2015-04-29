@@ -39,6 +39,12 @@ class basic_string
     // 注意不是string的最大内存，而是最长字符个数。单个最长字符串消耗的所有内存为
     // 地址空间的1/4
     static const size_type _S_max_size = ((npos - sizeof(_Rep_Base)) / sizeof(_CharT) - 1) / 4;
+    
+    // 每个字符串结尾处都有一个空字符，空字符串也不例外
+    static const _CharT _S_terminal = _CharT();
+    
+    // 空字符串是静态分配的，存储空间包括头部和尾字符，内存未对其的会padding
+    static size_type _S_empty_rep_storage[(sizeof(_Rep_Base) + sizeof(_CharT) + sizeof(size_type) - 1) / sizeof(size_type)];
   }
 };
 
