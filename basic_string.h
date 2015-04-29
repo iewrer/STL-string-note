@@ -58,7 +58,7 @@ class basic_string
     bool _M_set_leaked() __GLIBCXX_NOEXCEPT { _M_refcount = -1; }
     bool _M_set_sharable() __GLIBCXX_NOEXCEPT { return _M_refcount = 0; }
     
-    // 字符串空间已经申请好，此函数最后画龙点睛，填补元信息
+    // 字符串空间已经申请好，此函数最后画龙点睛，填补除capacity外的元信息
     void set_length_and_sharable(size_type __n) __GLIBCXX_NOEXCEPT
     {
  #if _GLIBCXX_FULLY_DYNAMIC_STRING == 0
@@ -70,6 +70,20 @@ class basic_string
         traits_type::assign(_M_refdata()[__n] = _S_terminal;
       }
  #endif
+    }
+    
+    // 直接定位到字符串第一个字符位置
+    _CharT* _M_refdata() __GLIBCXX_NOEXCEPT
+    {
+      return reinterpret_cast<_CharT*>(this + 1);
+    }
+    
+    _CharT* _M_grab(const _Alloc& alloc1, const _Alloc& alloc2)
+    {
+      if (!_M_is_leaked() && alloc1 != alloc2) {
+        return _M_refcopy();
+      }
+      return _M_clone();
     }
   }
 };
