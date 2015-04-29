@@ -25,7 +25,11 @@ class basic_string
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
   
-  
+  struct _Rep_Base {
+    size_type    _M_length;
+    size_type    _M_capacity;
+    _Atomic_word _M_refcount;    // 用于COW的原子引用计数
+  }
 };
 
 }
