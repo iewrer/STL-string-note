@@ -45,6 +45,32 @@ class basic_string
     
     // 空字符串是静态分配的，存储空间包括头部和尾字符，内存未对其的会padding
     static size_type _S_empty_rep_storage[(sizeof(_Rep_Base) + sizeof(_CharT) + sizeof(size_type) - 1) / sizeof(size_type)];
+    
+    //获取静态分配的空字符串
+    static _Rep& _S_empty_rep() __GLIBCXX_NOEXCEPT
+    {
+      void* __p = static_cast<void*>(_S_empty_rep_storage);
+      return *reinterpret_cast<_Rep*>(__p);
+    }
+    
+    bool _M_is_leak() __GLIBCXX_NOXCEPT { return _M_refcount < 0; }
+    bool _M_is_shared() __GLIBCXX_NOXCEPT { return _M_refcount > 0; }
+    bool _M_set_leaked() __GLIBCXX_NOEXCEPT { _M_refcount = -1; }
+    bool _M_set_sharable() __GLIBCXX_NOEXCEPT { return _M_refcount = 0; }
+    
+    // 字符串空间已经申请好，此函数最后画龙点睛，填补元信息
+    void set_length_and_sharable(size_type __n) __GLIBCXX_NOEXCEPT
+    {
+ #if _GLIBCXX_FULLY_DYNAMIC_STRING == 0
+      if (__builtin_expect(this != &_S_empty_rep, false))
+ #endif
+      {
+        this->set_sharable();
+        this->_M_length = __n;
+        traits_type::assign(_M_refdata()[__n] = _S_terminal;
+      }
+ #endif
+    }
   }
 };
 
