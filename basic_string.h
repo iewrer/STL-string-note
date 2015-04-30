@@ -94,7 +94,7 @@ class basic_string
       return _M_refdata();
     }
     
-    _CharT* _S_create(size_type __capacity, size_type old_capacity, const _Alloc& __alloc)
+    _Rep* _S_create(size_type __capacity, size_type old_capacity, const _Alloc& __alloc)
     {
       // 字符个数不能超过上限
       if (__capacity > _S_max_size) {
@@ -110,7 +110,20 @@ class basic_string
       }
       // __capacity个字符所需的内存量
       size_type __size = __capacity * (sizeof(_CharT) + 1) + sizeof(_Rep);
-      size_type __adj_size = __size + __mll
+      // 当内存增长且超过一个页表时，要与页表对齐
+      size_type __adj_size = __size + __malloc_header_size;
+      if (__adj_size > __page_size && __capacity > __old_capacity) {
+        const size_type __extra = __page_size - __adj_size % __page_size;
+        __capacity += __extra / sizeof(_CharT);
+      }
+      
+      void* __place = __Raw_bytes_alloc(__alloc).allocate(__size);
+      _Rep *__p = new(__place) _Rep; 
+      __p->capacity = __capacity;
+      // _M_length和_M_refcount都由caller设置
+      __p->set_sharable();
+      
+      return __p;
     }
   }
 };
