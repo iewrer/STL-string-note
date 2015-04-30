@@ -93,6 +93,25 @@ class basic_string
         __gnu_cxx::__atomic_add_dispatch(&this->_M_refcount, 1);
       return _M_refdata();
     }
+    
+    _CharT* _S_create(size_type __capacity, size_type old_capacity, const _Alloc& __alloc)
+    {
+      // 字符个数不能超过上限
+      if (__capacity > _S_max_size) {
+        __throw_length_error(__N("basic_string::_S_create"));
+      }
+      
+      const size_type __page_size = 4096;
+      const size_type __malloc_header_size = 4 * sizeof(void*);
+      
+      // string的字符个数是成倍增长的
+      if (__capacity > old_capacity && __capacity <= 2 * old_capacity) {
+        __capacity = 2 * old_capacity;
+      }
+      // __capacity个字符所需的内存量
+      size_type __size = __capacity * (sizeof(_CharT) + 1) + sizeof(_Rep);
+      size_type __adj_size = __size + __mll
+    }
   }
 };
 
