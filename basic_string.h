@@ -137,6 +137,15 @@ class basic_string
       
       return __r->_M_refdata();
     }
+  };
+  
+  struct _Alloc_hider : _Alloc
+  {
+    _Alloc_hider(_CharT* data, const _Alloc& __alloc) __GLIBCXX_NOEXCEPT
+      : _Alloc(a),
+        _M_p(data) {}
+        
+    _CharT* _M_p;
   }
 };
 
