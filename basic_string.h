@@ -125,6 +125,18 @@ class basic_string
       
       return __p;
     }
+    
+    _CharT* _M_clone(const _Alloc& __alloc, size_type __res)
+    {
+      const size_type request_cap = this->_M_length + __res;
+      _Rep* __r = _S_create(request_cap, _M_capacity, __alloc);
+      if (this->_M_length) {
+        _M_copy(__r->_M_refdata(), _M_refdata(), this->_M_length);
+      }
+      __r->set_length_and_sharable(this->_M_length);
+      
+      return __r->_M_refdata();
+    }
   }
 };
 
