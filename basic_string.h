@@ -137,6 +137,28 @@ class basic_string
       
       return __r->_M_refdata();
     }
+    
+    // 释放string，如果是最后一个引用，则彻底删除内存
+    void _M_dispose(const _Alloc& __alloc) __GLIBCXX_NOEXCEPT
+    {
+ #if _GLIBC_FULLY_DYNAMIC_STRING == 0
+      if (__builtin_expect(this == &_S_empty_rep(), false))
+ #endif
+      {
+        _GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE(&this->_M_refcount);
+        if (__gnu_cxx::__exchange_and_add_dispatch(&this->_M_refcount, -1) <= 0) {
+          _GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER(&this->_M_refcount);
+          _M_destroy(__alloc);
+        }
+      }
+    }
+    
+    // 释放内存，__size没有实际意义，因为分配的size可能比这个大
+    void _M_destroy(const _Alloc& __alloc) __GLIBCXX_NOEXCEPT
+    {
+      const size_type __size = sizeof(_Rep) + (this->_M_capacity + 1) * sizeof(_CharT);
+      _Raw_bytes_alloc.deallocate(reinterpret_cast<char*>(this), __size;)
+    }
   };
   
   struct _Alloc_hider : _Alloc
